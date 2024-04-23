@@ -1117,9 +1117,9 @@ static int btmtksdio_setup(struct hci_dev *hdev)
 			return err;
 		}
 
-		snprintf(fwname, sizeof(fwname),
-			 "mediatek/BT_RAM_CODE_MT%04x_1_%x_hdr.bin",
-			 dev_id & 0xffff, (fw_version & 0xff) + 1);
+		btmtk_fw_get_filename(fwname, sizeof(fwname), dev_id,
+				      fw_version);
+
 		err = mt79xx_setup(hdev, fwname);
 		if (err < 0)
 			return err;
