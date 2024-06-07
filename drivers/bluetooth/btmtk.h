@@ -148,6 +148,18 @@ struct btmtk_coredump_info {
 };
 
 #define BTMTK_TX_WAIT_VND_EVT	0
+#define BTMTK_FIRMWARE_LOADED   1
+#define BTMTK_HW_RESET_ACTIVE   2
+
+struct btmtk_data_i {
+	const char *drv_name;
+#if IS_ENABLED(CONFIG_BT_HCIBTUSB_MTK)
+	struct usb_device    *udev;
+	struct usb_interface *intf;
+	struct usb_anchor *ctrl_anchor;
+#endif
+	int (*reset_sync)(struct hci_dev *hdev, void *rst_data);
+};
 
 struct btmtk_data {
 	u32 dev_id;
@@ -231,13 +243,25 @@ static void btmtk_fw_get_filename(char *buf, size_t size, u32 dev_id,
 
 #if IS_ENABLED(CONFIG_BT_HCIBTUSB_MTK)
 
-int btmtk_usb_hci_wmt_sync(struct hci_dev *hdev,
-			   struct btmtk_hci_wmt_params *wmt_params);
+int btmtk_usb_subsys_reset(struct hci_dev *hdev, u32 dev_id);
+
+int btmtk_usb_setup(struct hci_dev *hdev, struct btmtk_data_i *i);
+
+int btmtk_usb_shutdown(struct hci_dev *hdev);
 
 #else
 
-static int btmtk_usb_hci_wmt_sync(struct hci_dev *hdev,
-			   struct btmtk_hci_wmt_params *wmt_params)
+static int btmtk_usb_subsys_reset(struct hci_dev *hdev, u32 dev_id)
+{
+	return -EOPNOTSUPP;
+}
+
+static int btmtk_usb_setup(struct hci_dev *hdev, struct btmtk_data_i *i)
+{
+	return -EOPNOTSUPP;
+}
+
+static int btmtk_usb_shutdown(struct hci_dev *hdev)
 {
 	return -EOPNOTSUPP;
 }
